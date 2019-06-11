@@ -234,13 +234,13 @@ func (c *Client) call(ct CallType, addr string, svcUrl common.URL, method string
 
 	var rsp *PendingResponse
 	if ct != CT_OneWay {
-		p.Header.Type = hessian.PackageRequest_TwoWay
+		p.PkgType = hessian.PackageRequest_TwoWay
 		rsp = NewPendingResponse()
 		rsp.reply = reply
 		rsp.callback = callback
 		rsp.opts = opts
 	} else {
-		p.Header.Type = hessian.PackageRequest
+		p.PkgType = hessian.PackageRequest
 	}
 
 	var (
@@ -306,7 +306,7 @@ func (c *Client) transfer(session getty.Session, pkg *DubboPackage,
 	if pkg == nil {
 		pkg = &DubboPackage{}
 		pkg.Body = []interface{}{}
-		pkg.Header.Type = hessian.PackageHeartbeat
+		pkg.PkgType = hessian.PackageHeartbeat
 		pkg.Header.SetSerialID(byte(S_Dubbo))
 	}
 	pkg.Header.ID = sequence

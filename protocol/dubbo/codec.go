@@ -56,6 +56,7 @@ type DubboPackage struct {
 	Service hessian.Service
 	Body    interface{}
 	Err     error
+	PkgType hessian.PackageType
 }
 
 func (p DubboPackage) String() string {
@@ -64,6 +65,7 @@ func (p DubboPackage) String() string {
 
 func (p *DubboPackage) Marshal() (*bytes.Buffer, error) {
 	codec := hessian.NewHessianCodec(nil)
+	codec.PkgType = p.PkgType
 
 	pkg, err := codec.Write(p.Service, p.Header, p.Body)
 	if err != nil {
@@ -81,6 +83,7 @@ func (p *DubboPackage) Unmarshal(buf *bytes.Buffer, opts ...interface{}) error {
 	if err != nil {
 		return perrors.WithStack(err)
 	}
+	p.PkgType = codec.PkgType
 
 	if len(opts) != 0 { // for client
 		client, ok := opts[0].(*Client)
@@ -94,7 +97,7 @@ func (p *DubboPackage) Unmarshal(buf *bytes.Buffer, opts ...interface{}) error {
 		}
 	}
 
-	if p.Header.Type&hessian.PackageHeartbeat != 0x00 {
+	if p.PkgType&hessian.PackageHeartbeat != 0x00 {
 		return nil
 	}
 

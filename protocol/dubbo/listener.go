@@ -84,7 +84,7 @@ func (h *RpcClientHandler) OnMessage(session getty.Session, pkg interface{}) {
 		return
 	}
 
-	if p.Header.Type&hessian.PackageHeartbeat != 0x00 {
+	if p.PkgType&hessian.PackageHeartbeat != 0x00 {
 		logger.Debugf("get rpc heartbeat response{header: %#v, body: %#v}", p.Header, p.Body)
 		return
 	}
@@ -193,7 +193,7 @@ func (h *RpcServerHandler) OnMessage(session getty.Session, pkg interface{}) {
 	p.Header.ResponseStatus = hessian.Response_OK
 
 	// heartbeat
-	if p.Header.Type&hessian.PackageHeartbeat != 0x00 {
+	if p.PkgType&hessian.PackageHeartbeat != 0x00 {
 		logger.Debugf("get rpc heartbeat request{header: %#v, service: %#v, body: %#v}", p.Header, p.Service, p.Body)
 		h.reply(session, p, hessian.PackageHeartbeat)
 		return
@@ -201,7 +201,7 @@ func (h *RpcServerHandler) OnMessage(session getty.Session, pkg interface{}) {
 
 	twoway := true
 	// not twoway
-	if p.Header.Type&hessian.PackageRequest_TwoWay == 0x00 {
+	if p.PkgType&hessian.PackageRequest_TwoWay == 0x00 {
 		twoway = false
 		h.reply(session, p, hessian.PackageResponse)
 	}
@@ -335,18 +335,16 @@ func (h *RpcServerHandler) callService(req *DubboPackage, ctx context.Context) {
 
 func (h *RpcServerHandler) reply(session getty.Session, req *DubboPackage, tp hessian.PackageType) {
 	header := hessian.DubboHeader{
-		Header: hessian.Header{
-			ResponseStatus: req.Header.ResponseStatus,
-			ID:             req.Header.ID,
-		},
-		Type: tp,
+		ResponseStatus: req.Header.ResponseStatus,
+		ID:             req.Header.ID,
 	}
 	header.SetSerialID(req.Header.GetSerialID())
 	resp := &DubboPackage{
-		Header: header,
+		Header:  header,
+		PkgType: tp,
 	}
 
-	if req.Header.Type&hessian.PackageRequest != 0x00 {
+	if req.PkgType&hessian.PackageRequest != 0x00 {
 		resp.Body = req.Body
 	} else {
 		resp.Body = nil
