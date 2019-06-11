@@ -29,8 +29,8 @@ import (
 func TestDubboPackage_MarshalAndUnmarshal(t *testing.T) {
 	pkg := &DubboPackage{}
 	pkg.Body = []interface{}{"a"}
-	pkg.Header.Type = hessian.PackageHeartbeat
-	pkg.Header.SerialID = byte(S_Dubbo)
+	pkg.PkgType = hessian.PackageHeartbeat
+	pkg.Header.SetSerialID(byte(S_Dubbo))
 	pkg.Header.ID = 10086
 
 	// heartbeat
@@ -41,13 +41,13 @@ func TestDubboPackage_MarshalAndUnmarshal(t *testing.T) {
 	pkgres.Body = []interface{}{}
 	err = pkgres.Unmarshal(data)
 	assert.NoError(t, err)
-	assert.Equal(t, hessian.PackageHeartbeat|hessian.PackageRequest|hessian.PackageRequest_TwoWay, pkgres.Header.Type)
-	assert.Equal(t, byte(S_Dubbo), pkgres.Header.SerialID)
-	assert.Equal(t, int64(10086), pkgres.Header.ID)
+	assert.Equal(t, hessian.PackageHeartbeat|hessian.PackageRequest|hessian.PackageRequest_TwoWay, pkgres.PkgType)
+	assert.Equal(t, byte(S_Dubbo), pkgres.Header.GetSerialID())
+	assert.Equal(t, uint64(10086), pkgres.Header.ID)
 	assert.Equal(t, 0, len(pkgres.Body.([]interface{})))
 
 	// request
-	pkg.Header.Type = hessian.PackageRequest
+	pkg.PkgType = hessian.PackageRequest
 	pkg.Service.Interface = "Service"
 	pkg.Service.Target = "Service"
 	pkg.Service.Version = "2.6"
@@ -60,9 +60,9 @@ func TestDubboPackage_MarshalAndUnmarshal(t *testing.T) {
 	pkgres.Body = make([]interface{}, 7)
 	err = pkgres.Unmarshal(data)
 	assert.NoError(t, err)
-	assert.Equal(t, hessian.PackageRequest, pkgres.Header.Type)
-	assert.Equal(t, byte(S_Dubbo), pkgres.Header.SerialID)
-	assert.Equal(t, int64(10086), pkgres.Header.ID)
+	assert.Equal(t, hessian.PackageRequest, pkgres.PkgType)
+	assert.Equal(t, byte(S_Dubbo), pkgres.Header.GetSerialID())
+	assert.Equal(t, uint64(10086), pkgres.Header.ID)
 	assert.Equal(t, "2.5.4", pkgres.Body.([]interface{})[0])
 	assert.Equal(t, "Service", pkgres.Body.([]interface{})[1])
 	assert.Equal(t, "2.6", pkgres.Body.([]interface{})[2])
