@@ -226,9 +226,9 @@ func (c *Client) call(ct CallType, addr string, svcUrl common.URL, method string
 	p.Service.Method = method
 	p.Service.Timeout = opts.RequestTimeout
 	if opts.SerialID == 0 {
-		p.Header.SerialID = byte(S_Dubbo)
+		p.Header.SetSerialID(byte(S_Dubbo))
 	} else {
-		p.Header.SerialID = byte(opts.SerialID)
+		p.Header.SetSerialID(byte(opts.SerialID))
 	}
 	p.Body = args
 
@@ -307,9 +307,9 @@ func (c *Client) transfer(session getty.Session, pkg *DubboPackage,
 		pkg = &DubboPackage{}
 		pkg.Body = []interface{}{}
 		pkg.Header.Type = hessian.PackageHeartbeat
-		pkg.Header.SerialID = byte(S_Dubbo)
+		pkg.Header.SetSerialID(byte(S_Dubbo))
 	}
-	pkg.Header.ID = int64(sequence)
+	pkg.Header.ID = sequence
 
 	// cond1
 	if rsp != nil {

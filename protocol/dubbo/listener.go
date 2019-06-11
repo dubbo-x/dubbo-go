@@ -334,13 +334,16 @@ func (h *RpcServerHandler) callService(req *DubboPackage, ctx context.Context) {
 }
 
 func (h *RpcServerHandler) reply(session getty.Session, req *DubboPackage, tp hessian.PackageType) {
-	resp := &DubboPackage{
-		Header: hessian.DubboHeader{
-			SerialID:       req.Header.SerialID,
-			Type:           tp,
-			ID:             req.Header.ID,
+	header := hessian.DubboHeader{
+		Header: hessian.Header{
 			ResponseStatus: req.Header.ResponseStatus,
+			ID:             req.Header.ID,
 		},
+		Type: tp,
+	}
+	header.SetSerialID(req.Header.GetSerialID())
+	resp := &DubboPackage{
+		Header: header,
 	}
 
 	if req.Header.Type&hessian.PackageRequest != 0x00 {
